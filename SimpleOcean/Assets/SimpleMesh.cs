@@ -7,10 +7,11 @@ public class SimpleMesh : MonoBehaviour {
     public Vector3[] uvs;
     public int[] tris;
 
-
     //resolution in verts
     public int resolution;
     public float scale;
+
+    private MeshFilter meshFilter;
 
 	void Start () {
         //initialize the array for storing verts
@@ -18,7 +19,10 @@ public class SimpleMesh : MonoBehaviour {
         tris = new int[(resolution - 1) * (resolution - 1) * 2 * 3];
 
         Mesh mesh = new Mesh();
-        GetComponent<MeshFilter>().mesh = mesh;
+        //Optimize for frequent updates
+        meshFilter = GetComponent<MeshFilter>();
+        meshFilter.mesh = mesh;
+        
 
         //Create vertices and triangles
         int lastTri = 0; //last triangle index
@@ -44,13 +48,27 @@ public class SimpleMesh : MonoBehaviour {
             }
         }
 
+        mesh.MarkDynamic();
         mesh.vertices = verts;
         mesh.triangles = tris;
-
+        
 	}
 
     void Update()
     {
-
+        meshFilter.mesh.vertices = verts;
+        meshFilter.mesh.RecalculateNormals();
+        //Reset verts
+        for (int i = 0; i < verts.Length; i++)
+        {
+            verts[i].y = 0.0f;
+        }
+        /*
+        for (int i = 0; i < verts.Length; i++)
+        {
+            Debug.DrawRay(verts[i], meshFilter.mesh.normals[i] * 0.25f);
+        }
+        */
+        //meshFilter.mesh.triangles = tris;
 	}
 }
